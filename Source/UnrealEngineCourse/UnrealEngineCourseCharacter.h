@@ -55,7 +55,10 @@ public:
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bHasRifle;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
+	int32 BulletCount;
+	
 	/** Setter to set the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void SetHasRifle(bool bNewHasRifle);

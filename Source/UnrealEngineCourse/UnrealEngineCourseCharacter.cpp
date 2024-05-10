@@ -14,8 +14,9 @@
 
 AUnrealEngineCourseCharacter::AUnrealEngineCourseCharacter()
 {
-	// Character doesnt have a rifle at start
+	// Character doesn't have a rifle at start
 	bHasRifle = false;
+	BulletCount = 25;
 	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
