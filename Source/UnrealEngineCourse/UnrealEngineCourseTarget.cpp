@@ -10,6 +10,7 @@ AUnrealEngineCourseTarget::AUnrealEngineCourseTarget()
 	PrimaryActorTick.bCanEverTick = false;
 
 	HitPoints = 100;
+	bImmortal = false;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetSimulatePhysics(true);

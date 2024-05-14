@@ -20,9 +20,12 @@ public:
 	// Sets default values for this actor's properties
 	AUnrealEngineCourseTarget();
 	
-	UPROPERTY(EditAnywhere, Category=Health)
+	UPROPERTY(EditAnywhere, Category=Health, AdvancedDisplay)
+	bool bImmortal;
+	
+	UPROPERTY(EditAnywhere, Category=Health, meta = (EditCondition = "!bImmortal", ClampMin = "0", ClampMax = "100"))
 	int32 HitPoints;
-
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
