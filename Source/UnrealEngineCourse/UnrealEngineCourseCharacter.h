@@ -14,6 +14,11 @@ class UCameraComponent;
 class UAnimMontage;
 class USoundBase;
 
+class AUnrealEngineCourseCharacter;
+
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoUpdateDelegateSignature, AUnrealEngineCourseCharacter*, Character);
+
 UCLASS(config=Game)
 class AUnrealEngineCourseCharacter : public ACharacter
 {
@@ -38,7 +43,6 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
-
 	
 public:
 	AUnrealEngineCourseCharacter();
@@ -56,9 +60,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bHasRifle;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
-	int32 BulletCount;
-	
 	/** Setter to set the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void SetHasRifle(bool bNewHasRifle);
@@ -66,6 +67,17 @@ public:
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Ammo)
+	int32 BulletCount;
+	
+	/** Delegate notified once the weapon fires a bullet */
+	UPROPERTY(BlueprintAssignable, Category = Ammo)
+	FOnAmmoUpdateDelegateSignature OnAmmoUpdated;
+	
+	/** Updates the ammo count with the noted difference */
+	UFUNCTION(BlueprintCallable, Category = Ammo)
+	bool UpdateAmmo(int32 Diff);
 
 protected:
 	/** Called for movement input */

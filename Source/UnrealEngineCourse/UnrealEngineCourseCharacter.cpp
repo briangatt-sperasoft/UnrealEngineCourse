@@ -109,3 +109,18 @@ bool AUnrealEngineCourseCharacter::GetHasRifle()
 {
 	return bHasRifle;
 }
+
+bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff)
+{
+	const int32 CurrentBulletCount = BulletCount;
+	BulletCount = std::max(BulletCount + Diff, 0);
+
+	bool bUpdated = (CurrentBulletCount != BulletCount);
+
+	if (bUpdated)
+	{
+		OnAmmoUpdated.Broadcast(this);
+	}
+	
+	return bUpdated;
+}
