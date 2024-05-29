@@ -68,6 +68,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle();
 	
+	// TODO Ideally, BulletCount is modeled as part of a 'Magazine' which is owned by a 'Weapon'
+	//		A character may own an 'Inventory' which hosts 'Magazines'
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Ammo)
 	int32 BulletCount;
 	
