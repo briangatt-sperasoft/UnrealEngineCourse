@@ -43,7 +43,11 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
-	
+
+	/** Pause Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* PauseAction;
+
 public:
 	AUnrealEngineCourseCharacter();
 
@@ -88,6 +92,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Called for pausing input */
+	void Pause(const FInputActionValue& Value);
 
 protected:
 	// APawn interface

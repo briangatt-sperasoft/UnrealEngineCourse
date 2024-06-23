@@ -46,7 +46,9 @@ void AUnrealEngineCourseCharacter::BeginPlay()
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+
+		if (Subsystem != nullptr)
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
@@ -70,6 +72,9 @@ void AUnrealEngineCourseCharacter::SetupPlayerInputComponent(class UInputCompone
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUnrealEngineCourseCharacter::Look);
+
+		//Pause
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &AUnrealEngineCourseCharacter::Pause);
 	}
 }
 
@@ -97,6 +102,15 @@ void AUnrealEngineCourseCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
+{
+	if (Controller != nullptr)
+	{
+		check(GEngine != nullptr);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Pause"));
 	}
 }
 
