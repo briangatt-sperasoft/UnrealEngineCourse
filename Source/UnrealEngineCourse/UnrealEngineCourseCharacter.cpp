@@ -8,6 +8,14 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+namespace
+{
+	TAutoConsoleVariable<bool> CVarInfiniteAmmo(
+		TEXT("r.InfiniteAmmo"),
+		false,
+		TEXT("Enables/Disable infinite ammo"),
+		ECVF_Scalability | ECVF_RenderThreadSafe);
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // AUnrealEngineCourseCharacter
@@ -134,6 +142,14 @@ bool AUnrealEngineCourseCharacter::GetHasRifle()
 
 bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff)
 {
+	const bool bInfiniteAmmo = CVarInfiniteAmmo->GetBool();
+
+	if (bInfiniteAmmo)
+	{
+		// Assume updated successfully, even though the value has not changed
+		return true;
+	}
+
 	const int32 CurrentBulletCount = BulletCount;
 	BulletCount = std::max(BulletCount + Diff, 0);
 
