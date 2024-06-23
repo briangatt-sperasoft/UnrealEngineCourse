@@ -23,7 +23,8 @@ AUnrealEngineCourseTarget::AUnrealEngineCourseTarget()
 void AUnrealEngineCourseTarget::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	OnTakeAnyDamage.AddDynamic(this, &AUnrealEngineCourseTarget::OnTakeDamage);
 }
 
 // Called every frame
@@ -33,3 +34,15 @@ void AUnrealEngineCourseTarget::Tick(float DeltaTime)
 
 }
 
+void AUnrealEngineCourseTarget::OnTakeDamage(AActor* /*DamagedActor*/, float Damage, const class UDamageType* /*DamageType*/, AController* /*InstigatedBy*/, AActor* /*DamageCauser*/)
+{
+	if (!bImmortal)
+	{
+		HitPoints -= static_cast<int>(Damage);
+	}
+
+	if (HitPoints <= 0)
+	{
+		Destroy();
+	}
+}

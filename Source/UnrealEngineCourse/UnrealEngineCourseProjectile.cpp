@@ -3,6 +3,7 @@
 #include "UnrealEngineCourseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AUnrealEngineCourseProjectile::AUnrealEngineCourseProjectile() 
 {
@@ -29,6 +30,8 @@ AUnrealEngineCourseProjectile::AUnrealEngineCourseProjectile()
 
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
+
+	Damage = 50.0f;
 }
 
 void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -36,6 +39,18 @@ void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* 
 	// Only add impulse and destroy projectile if we hit a physics
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
+		if (OtherActor->CanBeDamaged())
+		{
+			AController* controller = nullptr;
+
+			for (AActor* owner = GetOwner(); (owner != nullptr) && (controller == nullptr); owner = owner->GetOwner())
+			{
+				controller = owner->GetInstigatorController();
+			}
+
+			UGameplayStatics::ApplyDamage(OtherActor, Damage, controller, this, UDamageType::StaticClass());
+		}
+
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 		Destroy();

@@ -22,6 +22,9 @@ class AUnrealEngineCourseProjectile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 
+	UPROPERTY(VisibleAnywhere, Category = Damage)
+	float Damage;
+
 public:
 	AUnrealEngineCourseProjectile();
 
