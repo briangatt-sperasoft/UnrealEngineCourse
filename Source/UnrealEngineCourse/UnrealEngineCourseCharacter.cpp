@@ -109,8 +109,16 @@ void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
 {
 	if (Controller != nullptr)
 	{
-		check(GEngine != nullptr);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Pause"));
+		if ((Controller != nullptr) && Controller->IsLocalPlayerController())
+		{
+			APlayerController* const PC = CastChecked<APlayerController>(Controller);
+			const bool bPaused = PC->IsPaused();
+			
+			PC->SetPause(!bPaused);
+
+			check(GEngine != nullptr);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, bPaused ? TEXT("Resume") : TEXT("Pause"));
+		}
 	}
 }
 
