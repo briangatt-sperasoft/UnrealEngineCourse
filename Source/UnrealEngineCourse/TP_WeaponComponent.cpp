@@ -10,6 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/SphereComponent.h"
+
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
 {
@@ -68,6 +71,60 @@ void UTP_WeaponComponent::Fire()
 	}
 }
 
+
+void UTP_WeaponComponent::Predict()
+{
+	if (Character == nullptr || Character->GetController() == nullptr)
+	{
+		return;
+	}
+
+	// Try and fire a projectile
+	if (ProjectileClass != nullptr)
+	{
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
+			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+			// Spawn the projectile at the muzzle
+			AUnrealEngineCourseProjectile* Projectile = World->SpawnActor<AUnrealEngineCourseProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+
+			// --- 
+
+			FPredictProjectilePathParams PredictParams;
+
+			PredictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;
+			PredictParams.DrawDebugTime = 6.0f;
+			PredictParams.MaxSimTime = 100.0f;
+
+			PredictParams.ProjectileRadius = Projectile->GetCollisionComp()->GetScaledSphereRadius();
+			PredictParams.StartLocation = Projectile->GetActorLocation();
+
+			const FRotator Rotation = Projectile->GetActorRotation();
+			PredictParams.LaunchVelocity = Rotation.Vector() * Projectile->GetProjectileMovement()->InitialSpeed;
+
+			PredictParams.bTraceWithCollision = true;
+			PredictParams.ActorsToIgnore = { Projectile };
+
+			FPredictProjectilePathResult PredictResult;
+
+			const bool bHit = UGameplayStatics::PredictProjectilePath(GetWorld(), PredictParams, PredictResult);
+
+			// --- 
+
+			World->DestroyActor(Projectile);
+		}
+	}
+}
+
 void UTP_WeaponComponent::AttachWeapon(AUnrealEngineCourseCharacter* TargetCharacter)
 {
 	Character = TargetCharacter;
@@ -96,6 +153,9 @@ void UTP_WeaponComponent::AttachWeapon(AUnrealEngineCourseCharacter* TargetChara
 		{
 			// Fire
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
+
+			// Predict
+			EnhancedInputComponent->BindAction(PredictAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Predict);
 		}
 	}
 }
