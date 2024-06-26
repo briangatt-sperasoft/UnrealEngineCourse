@@ -4,6 +4,10 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "VisualLogger/VisualLogger.h"
+#include "Logging/LogMacros.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogProjectileActor, Verbose, All);
 
 AUnrealEngineCourseProjectile::AUnrealEngineCourseProjectile() 
 {
@@ -54,5 +58,7 @@ void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* 
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 		Destroy();
+
+		UE_VLOG(this, LogProjectileActor, Log, TEXT("Projectile hit at location (%s)"), *Hit.ImpactPoint.ToString());
 	}
 }
