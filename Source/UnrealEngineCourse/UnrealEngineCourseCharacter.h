@@ -15,6 +15,7 @@ class UAnimMontage;
 class USoundBase;
 
 class AUnrealEngineCourseCharacter;
+class UUnrealEngineCourseSaveGame;
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoUpdateDelegateSignature, AUnrealEngineCourseCharacter*, Character);
@@ -85,6 +86,9 @@ public:
 	/** Updates the ammo count with the noted difference */
 	UFUNCTION(BlueprintCallable, Category = Ammo)
 	bool UpdateAmmo(int32 Diff);
+
+	bool Save(UUnrealEngineCourseSaveGame* SaveGame);
+	bool Load(UUnrealEngineCourseSaveGame* SaveGame);
 
 protected:
 	/** Called for movement input */

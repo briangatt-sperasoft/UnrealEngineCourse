@@ -2,6 +2,7 @@
 
 #include "UnrealEngineCourseCharacter.h"
 #include "UnrealEngineCourseProjectile.h"
+#include "UnrealEngineCourseSaveGame.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -125,7 +126,7 @@ void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
 			PC->SetPause(!bPaused);
 
 			check(GEngine != nullptr);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, bPaused ? TEXT("Resume") : TEXT("Pause"));
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, bPaused ? TEXT("Resume") : TEXT("Pause"));
 		}
 	}
 }
@@ -161,4 +162,34 @@ bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff)
 	}
 	
 	return bUpdated;
+}
+
+bool AUnrealEngineCourseCharacter::Save(UUnrealEngineCourseSaveGame* SaveGame)
+{
+	SaveGame->Location = GetActorLocation();
+	SaveGame->BulletCount = BulletCount;
+	//SaveGame->bHasRifle = bHasRifle;
+
+	return true;
+}
+
+bool AUnrealEngineCourseCharacter::Load(UUnrealEngineCourseSaveGame* SaveGame)
+{
+	int CurrentBulletCount = BulletCount;
+
+	SetActorLocation(SaveGame->Location);
+	BulletCount = SaveGame->BulletCount;
+	//bHasRifle = SaveGame->bHasRifle;
+
+	// TODO
+	// - SetRifle - not just bool but trigger AttachWeapon
+	// - Targets - store the state of the targets/boxes (i.e their position, health and immortality)
+	// - Pickups - If Weapon/Ammo pickups are picked up, do not load them
+
+	if (CurrentBulletCount != BulletCount)
+	{
+		OnAmmoUpdated.Broadcast(this);
+	}
+
+	return true;
 }
