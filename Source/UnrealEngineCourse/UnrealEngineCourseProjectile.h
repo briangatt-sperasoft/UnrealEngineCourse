@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UnrealEngineCourseProjectileBase.h"
 #include "UnrealEngineCourseProjectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
 
 UCLASS(config=Game)
-class AUnrealEngineCourseProjectile : public AActor
+class AUnrealEngineCourseProjectile : public AUnrealEngineCourseProjectileBase
 {
 	GENERATED_BODY()
 
@@ -21,9 +21,6 @@ class AUnrealEngineCourseProjectile : public AActor
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
-
-	UPROPERTY(VisibleAnywhere, Category = Damage)
-	float Damage;
 
 public:
 	AUnrealEngineCourseProjectile();

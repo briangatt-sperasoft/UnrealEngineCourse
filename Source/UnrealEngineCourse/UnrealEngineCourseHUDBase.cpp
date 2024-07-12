@@ -19,7 +19,7 @@ namespace
 
 	FText GetBulletCount(const AUnrealEngineCourseCharacter& character)
 	{
-		return FText::AsNumber(character.BulletCount);
+		return FText::AsNumber(character.GetAmmoCount());
 	}
 }
 

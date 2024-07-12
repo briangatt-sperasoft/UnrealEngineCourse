@@ -55,6 +55,7 @@ void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* 
 			UGameplayStatics::ApplyDamage(OtherActor, Damage, controller, this, UDamageType::StaticClass());
 		}
 
+		//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, FString::Printf(TEXT("Impulse: %s"), *(GetVelocity() * 100.0f).ToString()));
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 		Destroy();

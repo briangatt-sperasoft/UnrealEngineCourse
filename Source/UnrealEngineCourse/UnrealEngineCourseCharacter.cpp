@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TP_WeaponComponent.h"
 
 namespace
 {
@@ -25,7 +26,6 @@ AUnrealEngineCourseCharacter::AUnrealEngineCourseCharacter()
 {
 	// Character doesn't have a rifle at start
 	bHasRifle = false;
-	BulletCount = 25;
 	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -141,7 +141,30 @@ bool AUnrealEngineCourseCharacter::GetHasRifle()
 	return bHasRifle;
 }
 
-bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff)
+namespace
+{
+
+	const int32* GetAmmo(const TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32>& AmmoRegistry, TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType)
+	{
+		return AmmoRegistry.Find(ProjectileType);
+	}
+
+	bool SetAmmo(TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32>& AmmoRegistry, TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType, int32 AmmoCount)
+	{
+		if (ProjectileType == nullptr)
+		{
+			return false;
+		}
+
+		int32& Ammo = AmmoRegistry.FindOrAdd(ProjectileType);
+		Ammo = AmmoCount;
+
+		return true;
+	}
+
+} // namespace
+
+bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff, TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType)
 {
 	const bool bInfiniteAmmo = CVarInfiniteAmmo->GetBool();
 
@@ -151,45 +174,78 @@ bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff)
 		return true;
 	}
 
-	const int32 CurrentBulletCount = BulletCount;
-	BulletCount = std::max(BulletCount + Diff, 0);
+	if (ProjectileType == nullptr)
+	{
+		return false;
+	}
 
-	bool bUpdated = (CurrentBulletCount != BulletCount);
+	int32 Count = GetAmmoCount(ProjectileType);
+
+	const int32 CurrentBulletCount = Count;
+	Count = std::max(Count + Diff, 0);
+
+	const bool bUpdated = (CurrentBulletCount != Count);
 
 	if (bUpdated)
 	{
-		OnAmmoUpdated.Broadcast(this);
+		SetAmmo(AmmoCount, ProjectileType, Count);
+
+		OnAmmoUpdated.Broadcast(this, Count, ProjectileType);
 	}
 	
 	return bUpdated;
 }
 
+int32 AUnrealEngineCourseCharacter::GetAmmoCount(TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType /*= nullptr*/) const
+{
+	if (ProjectileType == nullptr)
+	{
+		ProjectileType = AUnrealEngineCourseProjectile::StaticClass();
+	}
+
+	const int32* WeaponAmmo = GetAmmo(AmmoCount, ProjectileType);
+	return (WeaponAmmo != nullptr) ? *WeaponAmmo : 0;
+}
+
 bool AUnrealEngineCourseCharacter::Save(UUnrealEngineCourseSaveGame* SaveGame)
 {
 	SaveGame->Location = GetActorLocation();
-	SaveGame->BulletCount = BulletCount;
-	//SaveGame->bHasRifle = bHasRifle;
-
+	SaveGame->AmmoCount = AmmoCount;
+	
 	return true;
 }
 
 bool AUnrealEngineCourseCharacter::Load(UUnrealEngineCourseSaveGame* SaveGame)
 {
-	int CurrentBulletCount = BulletCount;
+	int CurrentBulletCount = GetAmmoCount();
 
 	SetActorLocation(SaveGame->Location);
-	BulletCount = SaveGame->BulletCount;
-	//bHasRifle = SaveGame->bHasRifle;
-
+	AmmoCount = SaveGame->AmmoCount;
+	
 	// TODO
 	// - SetRifle - not just bool but trigger AttachWeapon
 	// - Targets - store the state of the targets/boxes (i.e their position, health and immortality)
 	// - Pickups - If Weapon/Ammo pickups are picked up, do not load them
+	// - Rotation
 
-	if (CurrentBulletCount != BulletCount)
-	{
-		OnAmmoUpdated.Broadcast(this);
-	}
+	//if (CurrentBulletCount != BulletCount)
+	//{
+	//	OnAmmoUpdated.Broadcast(this);
+	//}
 
 	return true;
+}
+
+void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
+{
+
+	// Attach the weapon to the First Person Character
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	Weapon->AttachToComponent(GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+
+	// switch bHasRifle so the animation blueprint can switch to another animation set
+	SetHasRifle(Weapon->bIsRifle);
+
+	OnAmmoUpdated.Broadcast(this, GetAmmoCount(Weapon->ProjectileClass), Weapon->ProjectileClass);
+
 }

@@ -16,9 +16,11 @@ class USoundBase;
 
 class AUnrealEngineCourseCharacter;
 class UUnrealEngineCourseSaveGame;
+class UTP_WeaponComponent;
+class AUnrealEngineCourseProjectileBase;
 
 UDELEGATE(BlueprintAuthorityOnly)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoUpdateDelegateSignature, AUnrealEngineCourseCharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAmmoUpdateDelegateSignature, AUnrealEngineCourseCharacter*, Character, int32, BulletCount, TSubclassOf<AUnrealEngineCourseProjectileBase>, ProjectileType);
 
 UCLASS(config=Game)
 class AUnrealEngineCourseCharacter : public ACharacter
@@ -49,6 +51,12 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* PauseAction;
 
+	// TODO Ideally, AmmoCount is modeled as part of a 'Magazine' which is owned by a 'Weapon'
+	//		A character may own an 'Inventory' which hosts 'Magazines'
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
+	
 public:
 	AUnrealEngineCourseCharacter();
 
@@ -73,22 +81,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle();
 	
-	// TODO Ideally, BulletCount is modeled as part of a 'Magazine' which is owned by a 'Weapon'
-	//		A character may own an 'Inventory' which hosts 'Magazines'
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Ammo)
-	int32 BulletCount;
-	
 	/** Delegate notified once the weapon fires a bullet */
 	UPROPERTY(BlueprintAssignable, Category = Ammo)
 	FOnAmmoUpdateDelegateSignature OnAmmoUpdated;
 	
 	/** Updates the ammo count with the noted difference */
 	UFUNCTION(BlueprintCallable, Category = Ammo)
-	bool UpdateAmmo(int32 Diff);
+	bool UpdateAmmo(int32 Diff, TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType);
+	
+	UFUNCTION(BlueprintPure, Category = Ammo)
+	int32 GetAmmoCount(TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType = nullptr) const;
 
 	bool Save(UUnrealEngineCourseSaveGame* SaveGame);
 	bool Load(UUnrealEngineCourseSaveGame* SaveGame);
+
+	void AttachWeapon(UTP_WeaponComponent* Weapon);
 
 protected:
 	/** Called for movement input */

@@ -6,6 +6,8 @@
 #include "GameFramework/SaveGame.h"
 #include "UnrealEngineCourseSaveGame.generated.h"
 
+class AUnrealEngineCourseProjectileBase;
+
 /**
  * 
  */
@@ -22,5 +24,5 @@ public:
 	FVector Location;
 
 	UPROPERTY(VisibleAnywhere)
-	int BulletCount;
+	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
 };

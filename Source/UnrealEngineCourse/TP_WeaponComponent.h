@@ -16,7 +16,7 @@ class UNREALENGINECOURSE_API UTP_WeaponComponent : public USkeletalMeshComponent
 public:
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
-	TSubclassOf<class AUnrealEngineCourseProjectile> ProjectileClass;
+	TSubclassOf<class AUnrealEngineCourseProjectileBase> ProjectileClass;
 
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
@@ -38,6 +38,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 	
+	/** Determine if this weapon is a 'Rifle' type (to update animations accordingly) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Input, meta=(AllowPrivateAccess = "true"))
+	bool bIsRifle;
+
 	/** Sets default values for this component's properties */
 	UTP_WeaponComponent();
 
