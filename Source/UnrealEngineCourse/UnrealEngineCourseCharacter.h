@@ -57,6 +57,8 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
 	
+	UTP_WeaponComponent* AttachedWeapon;
+
 public:
 	AUnrealEngineCourseCharacter();
 

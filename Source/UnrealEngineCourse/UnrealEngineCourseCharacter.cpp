@@ -26,6 +26,7 @@ AUnrealEngineCourseCharacter::AUnrealEngineCourseCharacter()
 {
 	// Character doesn't have a rifle at start
 	bHasRifle = false;
+	AttachedWeapon = nullptr;
 	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -238,6 +239,11 @@ bool AUnrealEngineCourseCharacter::Load(UUnrealEngineCourseSaveGame* SaveGame)
 
 void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
 {
+	if (AttachedWeapon != nullptr)
+	{
+		AttachedWeapon->DetachFromParent();
+		AttachedWeapon->DestroyComponent();
+	}
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
@@ -245,6 +251,8 @@ void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set
 	SetHasRifle(Weapon->bIsRifle);
+
+	AttachedWeapon = Weapon;
 
 	OnAmmoUpdated.Broadcast(this, GetAmmoCount(Weapon->ProjectileClass), Weapon->ProjectileClass);
 
