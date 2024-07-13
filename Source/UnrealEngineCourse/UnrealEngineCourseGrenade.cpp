@@ -10,20 +10,16 @@
 
 AUnrealEngineCourseGrenade::AUnrealEngineCourseGrenade()
 {
-	// Use a sphere as a simple collision representation
 	CollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	CollisionComp->SetCapsuleSize(5.0f, 10.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->bApplyImpulseOnDamage = true;
-
-	// Players can't walk on it
+	
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
 
-	// Set as root component
 	RootComponent = CollisionComp;
 
-	// Use a ProjectileMovementComponent to govern this projectile's movement
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
 	ProjectileMovement->InitialSpeed = 3000.f;
@@ -32,6 +28,13 @@ AUnrealEngineCourseGrenade::AUnrealEngineCourseGrenade()
 	ProjectileMovement->bShouldBounce = true;
 
 	RadialForce = CreateDefaultSubobject<URadialForceComponent>(TEXT("ForceComp"));
+	RadialForce->Radius = 200.f;
+	RadialForce->bIgnoreOwningActor = true;
+	RadialForce->bImpulseVelChange = true;
+	RadialForce->ImpulseStrength = 4000.f;
+	RadialForce->ForceStrength = 0.f;
+
+	RadialForce->SetupAttachment(CollisionComp);
 
 	DetonateDelay = 3.0f;
 	Damage = 80.0f;
