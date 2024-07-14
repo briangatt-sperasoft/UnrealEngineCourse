@@ -210,9 +210,10 @@ int32 AUnrealEngineCourseCharacter::GetAmmoCount(TSubclassOf<AUnrealEngineCourse
 
 bool AUnrealEngineCourseCharacter::Save(UUnrealEngineCourseSaveGame* SaveGame)
 {
-	SaveGame->Location = GetActorLocation();
-	SaveGame->AmmoCount = AmmoCount;
-	
+	SaveGame->Player.AmmoCount = AmmoCount;
+	SaveGame->Player.Transform.Location = GetActorLocation();
+	SaveGame->Player.Transform.Rotation = GetActorRotation();
+
 	return true;
 }
 
@@ -220,8 +221,9 @@ bool AUnrealEngineCourseCharacter::Load(UUnrealEngineCourseSaveGame* SaveGame)
 {
 	int CurrentBulletCount = GetAmmoCount();
 
-	SetActorLocation(SaveGame->Location);
-	AmmoCount = SaveGame->AmmoCount;
+	SetActorLocation(SaveGame->Player.Transform.Location);
+	SetActorRotation(SaveGame->Player.Transform.Rotation);
+	AmmoCount = SaveGame->Player.AmmoCount;
 	
 	// TODO
 	// - SetRifle - not just bool but trigger AttachWeapon

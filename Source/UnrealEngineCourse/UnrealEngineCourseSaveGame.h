@@ -9,6 +9,54 @@
 class AUnrealEngineCourseProjectileBase;
 
 /**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FTransformMemento
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector Location;
+
+	UPROPERTY(BlueprintReadWrite)
+	FRotator Rotation;
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FPlayerMemento
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FTransformMemento Transform;
+
+	UPROPERTY(BlueprintReadWrite)
+	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FTargetMemento
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString Name;
+
+	UPROPERTY(BlueprintReadWrite)
+	FTransformMemento Transform;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 HitPoints;
+};
+
+/**
  * 
  */
 UCLASS()
@@ -21,8 +69,8 @@ public:
 	FString Map;
 
 	UPROPERTY(VisibleAnywhere)
-	FVector Location;
+	FPlayerMemento Player;
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
+	TArray<FTargetMemento> Targets;
 };

@@ -2,6 +2,7 @@
 
 #include "UnrealEngineCourseGameMode.h"
 #include "UnrealEngineCourseCharacter.h"
+#include "UnrealEngineCourseTarget.h"
 #include "UnrealEngineCourseSaveGame.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,7 +19,11 @@ AUnrealEngineCourseGameMode::AUnrealEngineCourseGameMode()
 	// set default HUD class to our Blueprinted HUD
 	static ConstructorHelpers::FClassFinder<AHUD> HUDClassFinder(TEXT("/Game/FirstPerson/Blueprints/HUD/BP_HUD"));
 	HUDClass = HUDClassFinder.Class;
+}
 
+void AUnrealEngineCourseGameMode::StartPlay()
+{
+	Super::StartPlay();
 }
 
 namespace
@@ -38,13 +43,30 @@ void AUnrealEngineCourseGameMode::SaveGame()
 
 	SaveGame* SaveGameInstance = Cast<SaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGame::StaticClass()));
 
-	AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-	Character->Save(SaveGameInstance);
-	SaveGameInstance->Map = GetWorld()->GetMapName();
-
 	if (SaveGameInstance != nullptr)
 	{
+		AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+		Character->Save(SaveGameInstance);
+		SaveGameInstance->Map = UGameplayStatics::GetCurrentLevelName(GetWorld());
+
+		TArray<AActor*> Targets;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
+
+		for (const AActor* Target : Targets)
+		{
+			FTargetMemento TargetMemento;
+
+			Target->GetName(TargetMemento.Name);
+
+			TargetMemento.Transform.Location = Target->GetActorLocation();
+			TargetMemento.Transform.Rotation = Target->GetActorRotation();
+			
+			TargetMemento.HitPoints = Cast<AUnrealEngineCourseTarget>(Target)->HitPoints;
+
+			SaveGameInstance->Targets.Add(TargetMemento);
+		}
+
 		FAsyncSaveGameToSlotDelegate SavedDelegate;
 		SavedDelegate.BindUObject(this, &AUnrealEngineCourseGameMode::OnSaveGameComplete);
 
@@ -77,14 +99,14 @@ void AUnrealEngineCourseGameMode::OnLoadGameComplete(const FString& SlotName, co
 
 	if (SaveGameInstance != nullptr)
 	{
+		//UGameplayStatics::OpenLevel(GetWorld(), FName{ SaveGameInstance->Map });
+
 		check(GEngine != nullptr);
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "Game Loaded Successfully");
 
 		AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
 		Character->Load(SaveGameInstance);
-
-		//SaveGameInstance->Map
 	}
 
 }

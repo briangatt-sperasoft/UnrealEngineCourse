@@ -22,6 +22,8 @@ public:
 	UFUNCTION(Exec)
 	void LoadGame();
 
+	void StartPlay() override;
+
 private:
 	void OnSaveGameComplete(const FString& SlotName, const int32 UserIndex, bool bSuccess);
 	void OnLoadGameComplete(const FString& SlotName, const int32 UserIndex, USaveGame* SaveGame);
