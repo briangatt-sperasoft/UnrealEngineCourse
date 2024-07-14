@@ -7,11 +7,15 @@
 #include "TP_WeaponComponent.generated.h"
 
 class AUnrealEngineCourseCharacter;
+class UTP_PredictProjectileComponent;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALENGINECOURSE_API UTP_WeaponComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
+
+	/** Pointer to the PredictProjectile Component this Actor holds*/
+	UTP_PredictProjectileComponent* Predictor;
 
 public:
 	/** Projectile class to spawn */
@@ -37,7 +41,11 @@ public:
 	/** Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
-	
+
+	/** Predict Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* PredictAction;
+
 	/** Determine if this weapon is a 'Rifle' type (to update animations accordingly) */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Input, meta=(AllowPrivateAccess = "true"))
 	bool bIsRifle;
@@ -53,12 +61,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
 
+	/** Make the weapon Predict a Projectile */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Predict();
+
 protected:
+	UFUNCTION()
+	virtual void BeginPlay() override;
+
 	/** Ends gameplay for this component. */
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	AUnrealEngineCourseProjectileBase* SpawnProjectile();
+
 	/** The Character holding this weapon*/
 	AUnrealEngineCourseCharacter* Character;
 };

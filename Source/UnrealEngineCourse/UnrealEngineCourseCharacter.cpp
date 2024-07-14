@@ -239,14 +239,16 @@ bool AUnrealEngineCourseCharacter::Load(UUnrealEngineCourseSaveGame* SaveGame)
 
 void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
 {
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+
 	if (AttachedWeapon != nullptr)
 	{
-		AttachedWeapon->DetachFromParent();
+		FDetachmentTransformRules DetachmentRules(AttachmentRules, true);
+		AttachedWeapon->DetachFromComponent(DetachmentRules);
 		AttachedWeapon->DestroyComponent();
 	}
 
 	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 	Weapon->AttachToComponent(GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set

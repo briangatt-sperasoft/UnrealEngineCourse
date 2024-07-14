@@ -63,3 +63,8 @@ void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* 
 		UE_VLOG(this, LogProjectileActor, Log, TEXT("Projectile hit at location (%s)"), *Hit.ImpactPoint.ToString());
 	}
 }
+
+float AUnrealEngineCourseProjectile::GetInitialSpeed() const
+{
+	return ProjectileMovement->InitialSpeed;
+}

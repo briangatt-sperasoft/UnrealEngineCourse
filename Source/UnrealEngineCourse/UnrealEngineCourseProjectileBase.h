@@ -18,4 +18,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
 	float Damage;
+
+	/** Returns Projectile Initial Speed **/
+	virtual float GetInitialSpeed() const { return 0.f; }
 };

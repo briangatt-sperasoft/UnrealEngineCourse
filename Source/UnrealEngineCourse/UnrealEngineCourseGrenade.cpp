@@ -59,3 +59,8 @@ void AUnrealEngineCourseGrenade::OnDetonate()
 
 	Destroy();
 }
+
+float AUnrealEngineCourseGrenade::GetInitialSpeed() const
+{
+	return ProjectileMovement->InitialSpeed;
+}

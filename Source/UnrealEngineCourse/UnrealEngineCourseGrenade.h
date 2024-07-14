@@ -40,6 +40,8 @@ public:
 	void BeginPlay() override;
 	// AActor overrides
 
+	float GetInitialSpeed() const override;
+
 private:
 	void OnDetonate();
 };
