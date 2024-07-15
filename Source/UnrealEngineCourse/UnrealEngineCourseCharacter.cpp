@@ -191,7 +191,9 @@ bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff, TSubclassOf<AUnrealEng
 	{
 		SetAmmo(AmmoCount, ProjectileType, Count);
 
-		OnAmmoUpdated.Broadcast(this, Count, ProjectileType);
+		if ((AttachedWeapon == nullptr) || (AttachedWeapon->ProjectileClass == ProjectileType)) {
+			OnAmmoUpdated.Broadcast(this, Count, ProjectileType);
+		}
 	}
 	
 	return bUpdated;
