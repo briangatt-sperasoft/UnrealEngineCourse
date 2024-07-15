@@ -113,6 +113,11 @@ void UTP_WeaponComponent::BeginPlay()
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (EndPlayReason == EEndPlayReason::Destroyed)
+	{
+		return;
+	}
+
 	if (Character == nullptr)
 	{
 		return;
