@@ -1,13 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UnrealEngineCourseGameMode.h"
+
+#include "UnrealEngineCourseSaveGameSystem.h"
 #include "UnrealEngineCourseCharacter.h"
 #include "UnrealEngineCourseTarget.h"
-#include "UnrealEngineCourseSaveGame.h"
+
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 
-#include <GameFramework/HUD.h>
+#include "GameFramework/PlayerStart.h"
+#include "GameFramework/HUD.h"
 
 AUnrealEngineCourseGameMode::AUnrealEngineCourseGameMode()
 	: Super()
@@ -26,19 +29,27 @@ void AUnrealEngineCourseGameMode::StartPlay()
 	Super::StartPlay();
 }
 
-namespace
+void AUnrealEngineCourseGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
+	Super::InitGame(MapName, Options, ErrorMessage);
 
-	const FString SlotNameString = TEXT("MySlotName");
-	const int UserIndexInt32 = 0;
+	// TODO Potentially load the game using the specified details
+	FString SlotName = UGameplayStatics::ParseOption(Options, "SlotName");
+	int32 UserIndex = UGameplayStatics::GetIntOption(Options, "UserIndex", 0);
 
-} // namespace
+	if (!SlotName.IsEmpty())
+	{
+		UUnrealEngineCourseSaveGameSystem* System = UGameplayStatics::GetGameInstance(GetWorld())->GetSubsystem<UUnrealEngineCourseSaveGameSystem>();
+		
+		if ((System != nullptr) && (System->GetLatestSaveState() != nullptr))
+		{
+			LoadGame(System->GetLatestSaveState());
+		}
+	}
+}
 
 void AUnrealEngineCourseGameMode::SaveGame()
 {
-	check(GEngine != nullptr);
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "SaveGame");
-
 	using SaveGame = UUnrealEngineCourseSaveGame;
 
 	SaveGame* SaveGameInstance = Cast<SaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGame::StaticClass()));
@@ -47,66 +58,59 @@ void AUnrealEngineCourseGameMode::SaveGame()
 	{
 		AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-		Character->Save(SaveGameInstance);
+		Character->Save(SaveGameInstance->Player);
 		SaveGameInstance->Map = UGameplayStatics::GetCurrentLevelName(GetWorld());
 
 		TArray<AActor*> Targets;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
 
-		for (const AActor* Target : Targets)
+		for (AActor* Target : Targets)
 		{
 			FTargetMemento TargetMemento;
 
-			Target->GetName(TargetMemento.Name);
-
-			TargetMemento.Transform.Location = Target->GetActorLocation();
-			TargetMemento.Transform.Rotation = Target->GetActorRotation();
-			
-			TargetMemento.HitPoints = Cast<AUnrealEngineCourseTarget>(Target)->HitPoints;
+			Cast<AUnrealEngineCourseTarget>(Target)->Save(TargetMemento);
 
 			SaveGameInstance->Targets.Add(TargetMemento);
 		}
-
-		FAsyncSaveGameToSlotDelegate SavedDelegate;
-		SavedDelegate.BindUObject(this, &AUnrealEngineCourseGameMode::OnSaveGameComplete);
-
-		UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, SlotNameString, UserIndexInt32, SavedDelegate);
 	}
+
+	UUnrealEngineCourseSaveGameSystem* System = GetGameInstance()->GetSubsystem<UUnrealEngineCourseSaveGameSystem>();
+	System->SaveGame(SaveGameInstance);
 }
 
 void AUnrealEngineCourseGameMode::LoadGame()
 {
-	check(GEngine != nullptr);
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "LoadGame");
-
-	FAsyncLoadGameFromSlotDelegate LoadedDelegate;
-	LoadedDelegate.BindUObject(this, &AUnrealEngineCourseGameMode::OnLoadGameComplete);
-
-	UGameplayStatics::AsyncLoadGameFromSlot(SlotNameString, UserIndexInt32, LoadedDelegate);
+	UUnrealEngineCourseSaveGameSystem* System = GetGameInstance()->GetSubsystem<UUnrealEngineCourseSaveGameSystem>();
+	System->LoadGame();
 }
 
-void AUnrealEngineCourseGameMode::OnSaveGameComplete(const FString& SlotName, const int32 UserIndex, bool bSuccess)
+void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* SaveGame)
 {
-	if (bSuccess) {
-		check(GEngine != nullptr);
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "Game Saved Successfully");
-	}
-}
-
-void AUnrealEngineCourseGameMode::OnLoadGameComplete(const FString& SlotName, const int32 UserIndex, USaveGame* SaveGame)
-{
-	UUnrealEngineCourseSaveGame* SaveGameInstance = Cast<UUnrealEngineCourseSaveGame>(SaveGame);
-
-	if (SaveGameInstance != nullptr)
 	{
-		//UGameplayStatics::OpenLevel(GetWorld(), FName{ SaveGameInstance->Map });
+		TArray<AActor*> PlayerStart;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStart);
 
-		check(GEngine != nullptr);
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "Game Loaded Successfully");
-
-		AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-		Character->Load(SaveGameInstance);
+		PlayerStart[0]->SetActorTransform(SaveGame->Player.Transform);
 	}
 
+	{
+		TArray<AActor*> Targets;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
+
+		for (AActor* Target : Targets)
+		{
+			const FTargetMemento* Memento = SaveGame->Targets.FindByPredicate([Target](const FTargetMemento& SavedTarget) {
+				return SavedTarget.Name == Target->GetName();
+			});
+
+			if (Memento != nullptr)
+			{
+				Cast<AUnrealEngineCourseTarget>(Target)->Load(*Memento);
+			}
+			else
+			{
+				Target->Destroy();
+			}
+		}
+	}
 }

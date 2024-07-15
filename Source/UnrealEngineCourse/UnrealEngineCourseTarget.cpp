@@ -2,6 +2,7 @@
 
 
 #include "UnrealEngineCourseTarget.h"
+#include "UnrealEngineCourseSaveGame.h"
 
 // Sets default values
 AUnrealEngineCourseTarget::AUnrealEngineCourseTarget()
@@ -27,11 +28,18 @@ void AUnrealEngineCourseTarget::BeginPlay()
 	OnTakeAnyDamage.AddDynamic(this, &AUnrealEngineCourseTarget::OnTakeDamage);
 }
 
-// Called every frame
-void AUnrealEngineCourseTarget::Tick(float DeltaTime)
+void AUnrealEngineCourseTarget::Save(FTargetMemento& Memento) const
 {
-	Super::Tick(DeltaTime);
+	GetName(Memento.Name);
 
+	Memento.Transform = GetActorTransform();
+	Memento.HitPoints = HitPoints;
+}
+
+void AUnrealEngineCourseTarget::Load(const FTargetMemento& Memento)
+{
+	SetActorTransform(Memento.Transform);
+	HitPoints = Memento.HitPoints;
 }
 
 void AUnrealEngineCourseTarget::OnTakeDamage(AActor* /*DamagedActor*/, float Damage, const class UDamageType* /*DamageType*/, AController* /*InstigatedBy*/, AActor* /*DamageCauser*/)

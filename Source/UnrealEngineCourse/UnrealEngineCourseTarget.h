@@ -7,6 +7,7 @@
 #include "UnrealEngineCourseTarget.generated.h"
 
 class UStaticMeshComponent;
+struct FTargetMemento;
 
 UCLASS()
 class UNREALENGINECOURSE_API AUnrealEngineCourseTarget : public AActor
@@ -30,9 +31,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+public:
+	void Save(FTargetMemento& memento) const;
+	void Load(const FTargetMemento& Memento);
 
 private:
 	UFUNCTION()

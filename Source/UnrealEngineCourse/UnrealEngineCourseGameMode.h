@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "UnrealEngineCourseGameMode.generated.h"
 
-class USaveGame;
+class UUnrealEngineCourseSaveGame;
 
 UCLASS(minimalapi)
 class AUnrealEngineCourseGameMode : public AGameModeBase
@@ -16,15 +16,17 @@ class AUnrealEngineCourseGameMode : public AGameModeBase
 public:
 	AUnrealEngineCourseGameMode();
 
+	// AGameModeBase overrides
+	void StartPlay() override;
+	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
+	// AGameModeBase overrides
+	
 	UFUNCTION(Exec)
 	void SaveGame();
 
 	UFUNCTION(Exec)
 	void LoadGame();
 
-	void StartPlay() override;
-
 private:
-	void OnSaveGameComplete(const FString& SlotName, const int32 UserIndex, bool bSuccess);
-	void OnLoadGameComplete(const FString& SlotName, const int32 UserIndex, USaveGame* SaveGame);
+	void LoadGame(const UUnrealEngineCourseSaveGame* SaveGame);
 };

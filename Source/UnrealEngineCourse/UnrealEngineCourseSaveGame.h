@@ -6,22 +6,8 @@
 #include "GameFramework/SaveGame.h"
 #include "UnrealEngineCourseSaveGame.generated.h"
 
+class AActor;
 class AUnrealEngineCourseProjectileBase;
-
-/**
- *
- */
-USTRUCT(BlueprintType)
-struct FTransformMemento
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite)
-	FVector Location;
-
-	UPROPERTY(BlueprintReadWrite)
-	FRotator Rotation;
-};
 
 /**
  *
@@ -32,7 +18,7 @@ struct FPlayerMemento
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FTransformMemento Transform;
+	FTransform Transform;
 
 	UPROPERTY(BlueprintReadWrite)
 	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
@@ -50,7 +36,7 @@ struct FTargetMemento
 	FString Name;
 
 	UPROPERTY(BlueprintReadWrite)
-	FTransformMemento Transform;
+	FTransform Transform;
 
 	UPROPERTY(BlueprintReadWrite)
 	int32 HitPoints;

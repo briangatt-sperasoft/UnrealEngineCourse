@@ -208,35 +208,20 @@ int32 AUnrealEngineCourseCharacter::GetAmmoCount(TSubclassOf<AUnrealEngineCourse
 	return (WeaponAmmo != nullptr) ? *WeaponAmmo : 0;
 }
 
-bool AUnrealEngineCourseCharacter::Save(UUnrealEngineCourseSaveGame* SaveGame)
+void AUnrealEngineCourseCharacter::Save(FPlayerMemento& SaveGame) const
 {
-	SaveGame->Player.AmmoCount = AmmoCount;
-	SaveGame->Player.Transform.Location = GetActorLocation();
-	SaveGame->Player.Transform.Rotation = GetActorRotation();
-
-	return true;
+	SaveGame.AmmoCount = AmmoCount;
+	SaveGame.Transform = GetActorTransform();
 }
 
-bool AUnrealEngineCourseCharacter::Load(UUnrealEngineCourseSaveGame* SaveGame)
+void AUnrealEngineCourseCharacter::Load(const FPlayerMemento& SaveGame)
 {
 	int CurrentBulletCount = GetAmmoCount();
 
-	SetActorLocation(SaveGame->Player.Transform.Location);
-	SetActorRotation(SaveGame->Player.Transform.Rotation);
-	AmmoCount = SaveGame->Player.AmmoCount;
+	SetActorTransform(SaveGame.Transform);
+	AmmoCount = SaveGame.AmmoCount;
 	
-	// TODO
-	// - SetRifle - not just bool but trigger AttachWeapon
-	// - Targets - store the state of the targets/boxes (i.e their position, health and immortality)
-	// - Pickups - If Weapon/Ammo pickups are picked up, do not load them
-	// - Rotation
-
-	//if (CurrentBulletCount != BulletCount)
-	//{
-	//	OnAmmoUpdated.Broadcast(this);
-	//}
-
-	return true;
+	//OnAmmoUpdated.Broadcast(this);
 }
 
 void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)

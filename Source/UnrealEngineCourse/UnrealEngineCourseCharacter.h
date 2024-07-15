@@ -15,9 +15,9 @@ class UAnimMontage;
 class USoundBase;
 
 class AUnrealEngineCourseCharacter;
-class UUnrealEngineCourseSaveGame;
 class UTP_WeaponComponent;
 class AUnrealEngineCourseProjectileBase;
+struct FPlayerMemento;
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAmmoUpdateDelegateSignature, AUnrealEngineCourseCharacter*, Character, int32, BulletCount, TSubclassOf<AUnrealEngineCourseProjectileBase>, ProjectileType);
@@ -94,8 +94,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = Ammo)
 	int32 GetAmmoCount(TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType = nullptr) const;
 
-	bool Save(UUnrealEngineCourseSaveGame* SaveGame);
-	bool Load(UUnrealEngineCourseSaveGame* SaveGame);
+	void Save(FPlayerMemento& SaveGame) const;
+	void Load(const FPlayerMemento& SaveGame);
 
 	void AttachWeapon(UTP_WeaponComponent* Weapon);
 
