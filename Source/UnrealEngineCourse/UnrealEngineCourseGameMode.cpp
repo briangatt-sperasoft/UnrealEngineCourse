@@ -87,13 +87,6 @@ void AUnrealEngineCourseGameMode::LoadGame()
 void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* SaveGame)
 {
 	{
-		TArray<AActor*> PlayerStart;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStart);
-
-		PlayerStart[0]->SetActorTransform(SaveGame->Player.Transform);
-	}
-
-	{
 		TArray<AActor*> Targets;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
 
@@ -111,6 +104,23 @@ void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* Sa
 			{
 				Target->Destroy();
 			}
+		}
+	}
+}
+
+void AUnrealEngineCourseGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
+{
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+
+	AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(NewPlayer->GetPawn());
+
+	if (Character != nullptr)
+	{
+		UUnrealEngineCourseSaveGameSystem* System = UGameplayStatics::GetGameInstance(GetWorld())->GetSubsystem<UUnrealEngineCourseSaveGameSystem>();
+
+		if ((System != nullptr) && (System->GetLatestSaveState() != nullptr))
+		{
+			Character->Load(System->GetLatestSaveState()->Player);
 		}
 	}
 }

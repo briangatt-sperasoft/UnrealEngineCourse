@@ -54,6 +54,7 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	// TODO Ideally, AmmoCount is modeled as part of a 'Magazine' which is owned by a 'Weapon'
 	//		A character may own an 'Inventory' which hosts 'Magazines'
 
+	// TODO Consider moving AmmoCount or similar properties to PlayerState instead
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
 	

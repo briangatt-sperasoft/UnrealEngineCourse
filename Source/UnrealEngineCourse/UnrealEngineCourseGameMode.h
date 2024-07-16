@@ -27,6 +27,9 @@ public:
 	UFUNCTION(Exec)
 	void LoadGame();
 
+	// NOTE The '_Implementation' suffix is standard for BlueprintNativeEvent
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
 private:
 	void LoadGame(const UUnrealEngineCourseSaveGame* SaveGame);
 };
