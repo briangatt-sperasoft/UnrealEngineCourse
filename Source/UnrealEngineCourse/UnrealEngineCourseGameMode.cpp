@@ -5,6 +5,7 @@
 #include "UnrealEngineCourseSaveGameSystem.h"
 #include "UnrealEngineCourseCharacter.h"
 #include "UnrealEngineCourseTarget.h"
+#include "TP_WeaponComponent.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,6 +26,9 @@ AUnrealEngineCourseGameMode::AUnrealEngineCourseGameMode()
 
 	static ConstructorHelpers::FClassFinder<AActor> AmmoPickupClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_AmmoPickup"));
 	AmmoPickupClass = AmmoPickupClassFinder.Class;
+
+	static ConstructorHelpers::FClassFinder<AActor> WeaponPickupClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_Pickup_Base"));
+	WeaponPickupClass = WeaponPickupClassFinder.Class;
 }
 
 void AUnrealEngineCourseGameMode::StartPlay()
@@ -62,9 +66,10 @@ void AUnrealEngineCourseGameMode::SaveGame()
 		{
 			SaveGameInstance->Map = UGameplayStatics::GetCurrentLevelName(GetWorld());
 		}
-		
+
+		AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
 		{
-			AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 			Character->Save(SaveGameInstance->Player);
 		}
 
@@ -75,7 +80,9 @@ void AUnrealEngineCourseGameMode::SaveGame()
 			for (AActor* Target : Targets)
 			{
 				FTargetMemento TargetMemento;
+				
 				Cast<AUnrealEngineCourseTarget>(Target)->Save(TargetMemento);
+				
 				SaveGameInstance->Targets.Add(TargetMemento);
 			}
 		}
@@ -87,8 +94,25 @@ void AUnrealEngineCourseGameMode::SaveGame()
 			for (AActor* AmmoPickup : AmmoPickups)
 			{
 				FAmmoPickupMemento PickupMemento;
+				
 				AmmoPickup->GetName(PickupMemento.Name);
+				
 				SaveGameInstance->AmmoPickups.Add(PickupMemento);
+			}
+		}
+
+		{
+			TArray<AActor*> WeaponPickups;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), WeaponPickupClass, WeaponPickups);
+
+			for (AActor* WeaponPickup : WeaponPickups)
+			{
+				FWeaponPickupMemento Memento;
+				
+				WeaponPickup->GetName(Memento.Name);
+				Memento.bAttached = (Character->GetAttachedWeapon() == WeaponPickup->GetComponentByClass(UTP_WeaponComponent::StaticClass()));
+
+				SaveGameInstance->WeaponPickups.Add(Memento);
 			}
 		}
 	}
@@ -102,6 +126,31 @@ void AUnrealEngineCourseGameMode::LoadGame()
 	UUnrealEngineCourseSaveGameSystem* System = GetGameInstance()->GetSubsystem<UUnrealEngineCourseSaveGameSystem>();
 	System->LoadGame();
 }
+
+namespace
+{
+
+	template <typename InMemento>
+	void RestoreActorsByName(UWorld* World, TSubclassOf<AActor> ClassType, const TArray<InMemento>& Mementos)
+	{
+		TArray<AActor*> Actors;
+		UGameplayStatics::GetAllActorsOfClass(World, ClassType, Actors);
+
+		for (AActor* Actor : Actors)
+		{
+			// TODO Consider optimizing by sorting the array prior to saving for faster lookups
+			const auto* ActorMemento = Mementos.FindByPredicate([Actor](const auto& Memento) {
+				return Memento.Name == Actor->GetName();
+			});
+
+			if (ActorMemento == nullptr)
+			{
+				Actor->Destroy();
+			}
+		}
+	}
+
+} // namespace
 
 void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* SaveGame)
 {
@@ -127,24 +176,11 @@ void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* Sa
 		}
 	}
 
-	// Retain AmmoPickups which have not been picked up in the last game session
-	{
-		TArray<AActor*> AmmoPickups;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AmmoPickupClass, AmmoPickups);
+	// TODO Given that AmmoPickups are a BluePrint type, consider serializing the UObject instance
+	//		to and FArchive (only properties which are decorated as SaveGame)
 
-		for (AActor* AmmoPickup : AmmoPickups)
-		{
-			// TODO Consider optimizing by sorting the array prior to saving for faster lookups
-			const FAmmoPickupMemento* Memento = SaveGame->AmmoPickups.FindByPredicate([AmmoPickup](const FAmmoPickupMemento& SavedAmmoPickup) {
-				return SavedAmmoPickup.Name == AmmoPickup->GetName();
-			});
-
-			if (Memento == nullptr)
-			{
-				AmmoPickup->Destroy();
-			}
-		}
-	}
+	RestoreActorsByName(GetWorld(), AmmoPickupClass, SaveGame->AmmoPickups);
+	RestoreActorsByName(GetWorld(), WeaponPickupClass, SaveGame->WeaponPickups);
 }
 
 void AUnrealEngineCourseGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
@@ -159,7 +195,31 @@ void AUnrealEngineCourseGameMode::HandleStartingNewPlayer_Implementation(APlayer
 
 		if ((System != nullptr) && (System->GetLatestSaveState() != nullptr))
 		{
-			Character->Load(System->GetLatestSaveState()->Player);
+			UUnrealEngineCourseSaveGame* SaveGame = System->GetLatestSaveState();
+
+			// Load Transform and AmmoCount
+			Character->Load(SaveGame->Player);
+
+			// Load AttachedWeapon
+			for (const FWeaponPickupMemento& WeaponPickup : SaveGame->WeaponPickups)
+			{
+				if (WeaponPickup.bAttached)
+				{
+					TArray<AActor*> WeaponPickups;
+					UGameplayStatics::GetAllActorsOfClass(GetWorld(), WeaponPickupClass, WeaponPickups);
+
+					AActor** PickupToAttach = WeaponPickups.FindByPredicate([&WeaponPickup](AActor* Value) {
+						return Value->GetName() == WeaponPickup.Name;
+					});
+
+					if (PickupToAttach != nullptr)
+					{
+						UTP_WeaponComponent* Component = Cast<UTP_WeaponComponent>((*PickupToAttach)->GetComponentByClass(UTP_WeaponComponent::StaticClass()));
+						Component->AttachWeapon(Character);
+					}
+				}
+			}
+
 		}
 	}
 }

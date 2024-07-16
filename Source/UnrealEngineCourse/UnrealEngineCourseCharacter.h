@@ -58,6 +58,7 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UTP_WeaponComponent* AttachedWeapon;
 
 public:
@@ -94,6 +95,9 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = Ammo)
 	int32 GetAmmoCount(TSubclassOf<AUnrealEngineCourseProjectileBase> ProjectileType = nullptr) const;
+
+	UFUNCTION(BlueprintPure, Category = Weapon)
+	UTP_WeaponComponent* GetAttachedWeapon() const;
 
 	void Save(FPlayerMemento& SaveGame) const;
 	void Load(const FPlayerMemento& SaveGame);

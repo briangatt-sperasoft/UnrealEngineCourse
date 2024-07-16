@@ -17,16 +17,8 @@ namespace
 
 } // namespace
 
-// TODO
-// - SetRifle - not just bool but trigger AttachWeapon
-// - Targets - store the state of the targets/boxes (i.e their position, health and immortality)
-// - Pickups - If Weapon/Ammo pickups are picked up, do not load them
-
 void UUnrealEngineCourseSaveGameSystem::SaveGame(UUnrealEngineCourseSaveGame* SaveGameInstance)
 {
-	check(IsValid(GEngine));
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "SaveGame");
-
 	if (IsValid(SaveGameInstance))
 	{
 		FAsyncSaveGameToSlotDelegate SavedDelegate;
@@ -38,9 +30,6 @@ void UUnrealEngineCourseSaveGameSystem::SaveGame(UUnrealEngineCourseSaveGame* Sa
 
 void UUnrealEngineCourseSaveGameSystem::LoadGame()
 {
-	check(IsValid(GEngine));
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, "LoadGame");
-
 	FAsyncLoadGameFromSlotDelegate LoadedDelegate;
 	LoadedDelegate.BindUObject(this, &UUnrealEngineCourseSaveGameSystem::OnLoadGameComplete);
 

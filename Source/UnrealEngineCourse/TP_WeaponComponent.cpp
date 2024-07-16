@@ -92,6 +92,7 @@ void UTP_WeaponComponent::AttachWeapon(AUnrealEngineCourseCharacter* TargetChara
 			// Fire
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
 
+			Predictor = Cast<UTP_PredictProjectileComponent>(GetOwner()->GetComponentByClass(UTP_PredictProjectileComponent::StaticClass()));
 			if (Predictor != nullptr)
 			{
 				// Predict
@@ -104,11 +105,6 @@ void UTP_WeaponComponent::AttachWeapon(AUnrealEngineCourseCharacter* TargetChara
 void UTP_WeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (PredictAction != nullptr)
-	{
-		Predictor = Cast<UTP_PredictProjectileComponent>(GetOwner()->GetComponentByClass(UTP_PredictProjectileComponent::StaticClass()));
-	}
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

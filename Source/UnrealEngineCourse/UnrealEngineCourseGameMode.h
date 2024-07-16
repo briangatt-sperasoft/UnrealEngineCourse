@@ -16,6 +16,9 @@ class AUnrealEngineCourseGameMode : public AGameModeBase
 	UPROPERTY()
 	TSubclassOf<AActor> AmmoPickupClass;
 
+	UPROPERTY()
+	TSubclassOf<AActor> WeaponPickupClass;
+
 public:
 	AUnrealEngineCourseGameMode();
 

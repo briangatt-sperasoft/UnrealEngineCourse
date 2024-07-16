@@ -22,6 +22,10 @@ struct FPlayerMemento
 
 	UPROPERTY(BlueprintReadWrite)
 	TMap<TSubclassOf<AUnrealEngineCourseProjectileBase>, int32> AmmoCount;
+
+	// The name of the Actor instance of the weapon pickup (which was then attached to the player as a weapon)
+	UPROPERTY(BlueprintReadWrite)
+	FString AttachedWeaponPickup;
 };
 
 /**
@@ -42,7 +46,6 @@ struct FTargetMemento
 	int32 HitPoints;
 };
 
-
 /**
  *
  */
@@ -53,6 +56,21 @@ struct FAmmoPickupMemento
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Name;
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FWeaponPickupMemento
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString Name;
+	
+	UPROPERTY(BlueprintReadWrite)
+	bool bAttached = false;
 };
 
 /**
@@ -75,4 +93,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FAmmoPickupMemento> AmmoPickups;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FWeaponPickupMemento> WeaponPickups;
 };

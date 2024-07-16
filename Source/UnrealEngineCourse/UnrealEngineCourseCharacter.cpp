@@ -63,7 +63,6 @@ void AUnrealEngineCourseCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -208,6 +207,11 @@ int32 AUnrealEngineCourseCharacter::GetAmmoCount(TSubclassOf<AUnrealEngineCourse
 	return (WeaponAmmo != nullptr) ? *WeaponAmmo : 0;
 }
 
+UTP_WeaponComponent* AUnrealEngineCourseCharacter::GetAttachedWeapon() const
+{
+	return AttachedWeapon;
+}
+
 void AUnrealEngineCourseCharacter::Save(FPlayerMemento& SaveGame) const
 {
 	SaveGame.AmmoCount = AmmoCount;
@@ -220,8 +224,6 @@ void AUnrealEngineCourseCharacter::Load(const FPlayerMemento& SaveGame)
 
 	SetActorTransform(SaveGame.Transform);
 	AmmoCount = SaveGame.AmmoCount;
-	
-	//OnAmmoUpdated.Broadcast(this);
 }
 
 void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
@@ -244,5 +246,4 @@ void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
 	AttachedWeapon = Weapon;
 
 	OnAmmoUpdated.Broadcast(this, GetAmmoCount(Weapon->ProjectileClass), Weapon->ProjectileClass);
-
 }
