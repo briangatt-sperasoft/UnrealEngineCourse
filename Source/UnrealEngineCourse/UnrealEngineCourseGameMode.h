@@ -13,6 +13,9 @@ class AUnrealEngineCourseGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	TSubclassOf<AActor> AmmoPickupClass;
+
 public:
 	AUnrealEngineCourseGameMode();
 

@@ -42,6 +42,19 @@ struct FTargetMemento
 	int32 HitPoints;
 };
 
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FAmmoPickupMemento
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString Name;
+};
+
 /**
  * 
  */
@@ -59,4 +72,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FTargetMemento> Targets;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FAmmoPickupMemento> AmmoPickups;
 };

@@ -22,6 +22,9 @@ AUnrealEngineCourseGameMode::AUnrealEngineCourseGameMode()
 	// set default HUD class to our Blueprinted HUD
 	static ConstructorHelpers::FClassFinder<AHUD> HUDClassFinder(TEXT("/Game/FirstPerson/Blueprints/HUD/BP_HUD"));
 	HUDClass = HUDClassFinder.Class;
+
+	static ConstructorHelpers::FClassFinder<AActor> AmmoPickupClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_AmmoPickup"));
+	AmmoPickupClass = AmmoPickupClassFinder.Class;
 }
 
 void AUnrealEngineCourseGameMode::StartPlay()
@@ -56,21 +59,37 @@ void AUnrealEngineCourseGameMode::SaveGame()
 
 	if (SaveGameInstance != nullptr)
 	{
-		AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-		Character->Save(SaveGameInstance->Player);
-		SaveGameInstance->Map = UGameplayStatics::GetCurrentLevelName(GetWorld());
-
-		TArray<AActor*> Targets;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
-
-		for (AActor* Target : Targets)
 		{
-			FTargetMemento TargetMemento;
+			SaveGameInstance->Map = UGameplayStatics::GetCurrentLevelName(GetWorld());
+		}
+		
+		{
+			AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			Character->Save(SaveGameInstance->Player);
+		}
 
-			Cast<AUnrealEngineCourseTarget>(Target)->Save(TargetMemento);
+		{
+			TArray<AActor*> Targets;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
 
-			SaveGameInstance->Targets.Add(TargetMemento);
+			for (AActor* Target : Targets)
+			{
+				FTargetMemento TargetMemento;
+				Cast<AUnrealEngineCourseTarget>(Target)->Save(TargetMemento);
+				SaveGameInstance->Targets.Add(TargetMemento);
+			}
+		}
+
+		{
+			TArray<AActor*> AmmoPickups;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AmmoPickupClass, AmmoPickups);
+
+			for (AActor* AmmoPickup : AmmoPickups)
+			{
+				FAmmoPickupMemento PickupMemento;
+				AmmoPickup->GetName(PickupMemento.Name);
+				SaveGameInstance->AmmoPickups.Add(PickupMemento);
+			}
 		}
 	}
 
@@ -86,6 +105,7 @@ void AUnrealEngineCourseGameMode::LoadGame()
 
 void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* SaveGame)
 {
+	// Restore Target states and remove and Target which has been 'defeated'
 	{
 		TArray<AActor*> Targets;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnrealEngineCourseTarget::StaticClass(), Targets);
@@ -103,6 +123,25 @@ void AUnrealEngineCourseGameMode::LoadGame(const UUnrealEngineCourseSaveGame* Sa
 			else
 			{
 				Target->Destroy();
+			}
+		}
+	}
+
+	// Retain AmmoPickups which have not been picked up in the last game session
+	{
+		TArray<AActor*> AmmoPickups;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AmmoPickupClass, AmmoPickups);
+
+		for (AActor* AmmoPickup : AmmoPickups)
+		{
+			// TODO Consider optimizing by sorting the array prior to saving for faster lookups
+			const FAmmoPickupMemento* Memento = SaveGame->AmmoPickups.FindByPredicate([AmmoPickup](const FAmmoPickupMemento& SavedAmmoPickup) {
+				return SavedAmmoPickup.Name == AmmoPickup->GetName();
+			});
+
+			if (Memento == nullptr)
+			{
+				AmmoPickup->Destroy();
 			}
 		}
 	}
