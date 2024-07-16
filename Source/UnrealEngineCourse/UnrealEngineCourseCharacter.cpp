@@ -190,7 +190,9 @@ bool AUnrealEngineCourseCharacter::UpdateAmmo(int32 Diff, TSubclassOf<AUnrealEng
 	{
 		SetAmmo(AmmoCount, ProjectileType, Count);
 
-		OnAmmoUpdated.Broadcast(this, Count, ProjectileType);
+		if ((AttachedWeapon == nullptr) || (AttachedWeapon->ProjectileClass == ProjectileType)) {
+			OnAmmoUpdated.Broadcast(this, Count, ProjectileType);
+		}
 	}
 	
 	return bUpdated;
@@ -234,7 +236,8 @@ void AUnrealEngineCourseCharacter::AttachWeapon(UTP_WeaponComponent* Weapon)
 	{
 		FDetachmentTransformRules DetachmentRules(AttachmentRules, true);
 		AttachedWeapon->DetachFromComponent(DetachmentRules);
-		AttachedWeapon->DestroyComponent();
+		
+		AttachedWeapon->GetOwner()->Destroy();
 	}
 
 	// Attach the weapon to the First Person Character
