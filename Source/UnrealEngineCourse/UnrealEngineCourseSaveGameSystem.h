@@ -26,6 +26,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void LoadGame();
+	
+	UFUNCTION(BlueprintPure)
+	bool DoesSaveGameExist() const;
 
 	UFUNCTION(BlueprintPure)
 	inline UUnrealEngineCourseSaveGame* GetLatestSaveState() { return LastSaveState; }

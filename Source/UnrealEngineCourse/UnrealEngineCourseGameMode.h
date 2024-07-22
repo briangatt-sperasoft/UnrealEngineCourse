@@ -27,11 +27,14 @@ public:
 	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	// AGameModeBase overrides
 	
-	UFUNCTION(Exec)
+	UFUNCTION(Exec, BlueprintCallable)
 	void SaveGame();
 
-	UFUNCTION(Exec)
+	UFUNCTION(Exec, BlueprintCallable)
 	void LoadGame();
+
+	UFUNCTION(BlueprintPure)
+	bool DoesSaveGameExist() const;
 
 	// NOTE The '_Implementation' suffix is standard for BlueprintNativeEvent
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;

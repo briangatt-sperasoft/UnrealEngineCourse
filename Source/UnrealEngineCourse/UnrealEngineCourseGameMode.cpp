@@ -127,6 +127,12 @@ void AUnrealEngineCourseGameMode::LoadGame()
 	System->LoadGame();
 }
 
+bool AUnrealEngineCourseGameMode::DoesSaveGameExist() const
+{
+	UUnrealEngineCourseSaveGameSystem* System = GetGameInstance()->GetSubsystem<UUnrealEngineCourseSaveGameSystem>();
+	return System->DoesSaveGameExist();
+}
+
 namespace
 {
 

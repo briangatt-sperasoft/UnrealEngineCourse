@@ -36,6 +36,11 @@ void UUnrealEngineCourseSaveGameSystem::LoadGame()
 	UGameplayStatics::AsyncLoadGameFromSlot(SlotNameString, UserIndexInt32, LoadedDelegate);
 }
 
+bool UUnrealEngineCourseSaveGameSystem::DoesSaveGameExist() const
+{
+	return UGameplayStatics::DoesSaveGameExist(SlotNameString, UserIndexInt32);
+}
+
 void UUnrealEngineCourseSaveGameSystem::OnSaveGameComplete(const FString& SlotName, const int32 UserIndex, bool bSuccess)
 {
 	if (bSuccess) {
