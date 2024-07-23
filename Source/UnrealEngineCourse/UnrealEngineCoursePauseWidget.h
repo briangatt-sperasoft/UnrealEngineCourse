@@ -8,6 +8,8 @@
 
 class UButton;
 
+DECLARE_DELEGATE(FnOnResumeEvent);
+
 /**
  * 
  */
@@ -17,33 +19,37 @@ class UNREALENGINECOURSE_API UUnrealEngineCoursePauseWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	UButton* Btn_Resume;
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UButton* Btn_Resume = nullptr;
 	
-	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	UButton* Btn_LoadGame;
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UButton* Btn_LoadGame = nullptr;
 	
-	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	UButton* Btn_SaveGame;
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UButton* Btn_SaveGame = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	UButton* Btn_Exit;
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UButton* Btn_Exit = nullptr;
+
+	FnOnResumeEvent OnResume;
 
 protected:
 	void NativeConstruct() override;
 
+	void NativeOnInitialized() override;
+
 private:
 	UFUNCTION()
-	void OnResume();
+	void OnResumeClicked();
 	
 	UFUNCTION()
-	void OnLoadGame();
+	void OnLoadGameClicked();
 	
 	UFUNCTION()
-	void OnSaveGame();
+	void OnSaveGameClicked();
 
 	UFUNCTION()
-	void OnExit();
+	void OnExitClicked();
 	
 	UFUNCTION()
 	bool IsSaveGameAvailable();

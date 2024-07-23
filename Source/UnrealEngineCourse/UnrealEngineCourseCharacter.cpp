@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TP_WeaponComponent.h"
+#include "UnrealEngineCoursePauseWidget.h"
 
 namespace
 {
@@ -45,7 +46,6 @@ AUnrealEngineCourseCharacter::AUnrealEngineCourseCharacter()
 	Mesh1P->CastShadow = false;
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
-
 }
 
 void AUnrealEngineCourseCharacter::BeginPlay()
@@ -114,20 +114,65 @@ void AUnrealEngineCourseCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+namespace
+{
+
+	void TogglePauseGame(APlayerController* PC)
+	{
+		check(PC != nullptr);
+
+		const bool bPaused = PC->IsPaused();
+
+		PC->SetPause(!bPaused);
+
+		check(GEngine != nullptr);
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, bPaused ? TEXT("Resume") : TEXT("Pause"));
+	}
+
+} // namespace
+
 void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
 {
-	if (Controller != nullptr)
-	{
-		if ((Controller != nullptr) && Controller->IsLocalPlayerController())
-		{
-			APlayerController* const PC = CastChecked<APlayerController>(Controller);
-			const bool bPaused = PC->IsPaused();
-			
-			PC->SetPause(!bPaused);
+	APlayerController* const PC = CastChecked<APlayerController>(Controller);
 
-			check(GEngine != nullptr);
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::White, bPaused ? TEXT("Resume") : TEXT("Pause"));
+	if ((PC != nullptr) && PC->IsLocalPlayerController())
+	{
+		if (PauseWidgetClass)
+		{
+			if (PauseWidget == nullptr)
+			{
+				PauseWidget = CreateWidget<UUnrealEngineCoursePauseWidget>(PC, PauseWidgetClass);
+
+				PauseWidget->OnResume.BindLambda([this, PC]() {
+
+					FInputModeGameOnly Mode;
+					PC->SetInputMode(Mode);
+
+					PauseWidget->RemoveFromViewport();
+
+					PauseWidget = nullptr;
+					PC->bShowMouseCursor = false;
+
+					TogglePauseGame(PC);
+
+				});
+
+				FInputModeUIOnly Mode;
+				Mode.SetLockMouseToViewportBehavior(EMouseLockMode::LockOnCapture);
+				PC->SetInputMode(Mode);
+
+				PauseWidget->AddToViewport();
+				
+				PC->bShowMouseCursor = true;
+			}
+			else
+			{
+				PauseWidget->OnResume.Execute();
+				return;
+			}
 		}
+
+		TogglePauseGame(PC);
 	}
 }
 

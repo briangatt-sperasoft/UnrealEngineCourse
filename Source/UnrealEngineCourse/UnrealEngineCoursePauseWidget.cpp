@@ -28,30 +28,41 @@ void UUnrealEngineCoursePauseWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Btn_Resume->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnResume);
-	Btn_LoadGame->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnLoadGame);
-	Btn_SaveGame->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnSaveGame);
-	Btn_Exit->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnExit);
+	Btn_Resume->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnResumeClicked);
+	Btn_LoadGame->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnLoadGameClicked);
+	Btn_SaveGame->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnSaveGameClicked);
+	Btn_Exit->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnExitClicked);
 
-	Btn_LoadGame->bIsEnabledDelegate.BindDynamic(this, &UUnrealEngineCoursePauseWidget::IsSaveGameAvailable);
+	//Btn_LoadGame->bIsEnabledDelegate.BindDynamic(this, &UUnrealEngineCoursePauseWidget::IsSaveGameAvailable);
+	Btn_LoadGame->SetIsEnabled(IsSaveGameAvailable());
+
+	Btn_Resume->SetFocus();
 }
 
-void UUnrealEngineCoursePauseWidget::OnResume()
+void UUnrealEngineCoursePauseWidget::NativeOnInitialized()
 {
-	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	Super::NativeOnInitialized();
 }
 
-void UUnrealEngineCoursePauseWidget::OnLoadGame()
+void UUnrealEngineCoursePauseWidget::OnResumeClicked()
+{
+	OnResume.ExecuteIfBound();
+}
+
+void UUnrealEngineCoursePauseWidget::OnLoadGameClicked()
 {
 	GetGameMode(GetWorld())->LoadGame();
 }
 
-void UUnrealEngineCoursePauseWidget::OnSaveGame()
+void UUnrealEngineCoursePauseWidget::OnSaveGameClicked()
 {
 	GetGameMode(GetWorld())->SaveGame();
+
+	// TODO Hook to async delegate in SaveGame to only enable when async returns success
+	Btn_LoadGame->SetIsEnabled(true);
 }
 
-void UUnrealEngineCoursePauseWidget::OnExit()
+void UUnrealEngineCoursePauseWidget::OnExitClicked()
 {
 	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
 }

@@ -17,6 +17,7 @@ class USoundBase;
 class AUnrealEngineCourseCharacter;
 class UTP_WeaponComponent;
 class AUnrealEngineCourseProjectileBase;
+class UUnrealEngineCoursePauseWidget;
 struct FPlayerMemento;
 
 UDELEGATE(BlueprintAuthorityOnly)
@@ -61,6 +62,9 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UTP_WeaponComponent* AttachedWeapon;
 
+	UPROPERTY()
+	UUnrealEngineCoursePauseWidget* PauseWidget;
+
 public:
 	AUnrealEngineCourseCharacter();
 
@@ -103,6 +107,9 @@ public:
 	void Load(const FPlayerMemento& SaveGame);
 
 	void AttachWeapon(UTP_WeaponComponent* Weapon);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UI)
+	TSubclassOf<UUnrealEngineCoursePauseWidget> PauseWidgetClass;
 
 protected:
 	/** Called for movement input */
