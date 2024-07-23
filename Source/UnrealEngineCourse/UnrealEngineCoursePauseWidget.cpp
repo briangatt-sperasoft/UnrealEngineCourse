@@ -33,8 +33,9 @@ void UUnrealEngineCoursePauseWidget::NativeConstruct()
 	Btn_SaveGame->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnSaveGameClicked);
 	Btn_Exit->OnClicked.AddDynamic(this, &UUnrealEngineCoursePauseWidget::OnExitClicked);
 
-	//Btn_LoadGame->bIsEnabledDelegate.BindDynamic(this, &UUnrealEngineCoursePauseWidget::IsSaveGameAvailable);
-	Btn_LoadGame->SetIsEnabled(IsSaveGameAvailable());
+	Btn_LoadGame->bIsEnabledDelegate.BindDynamic(this, &UUnrealEngineCoursePauseWidget::IsSaveGameAvailable);
+	Btn_LoadGame->SynchronizeProperties();
+	//Btn_LoadGame->SetIsEnabled(IsSaveGameAvailable());
 
 	Btn_Resume->SetFocus();
 }
