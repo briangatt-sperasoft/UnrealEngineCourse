@@ -145,8 +145,8 @@ void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
 
 				PauseWidget->OnResume.BindLambda([this, PC]() {
 
-					FInputModeGameOnly Mode;
-					PC->SetInputMode(Mode);
+					//FInputModeGameOnly Mode;
+					//PC->SetInputMode(Mode);
 
 					PauseWidget->RemoveFromViewport();
 
@@ -157,9 +157,9 @@ void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
 
 				});
 
-				FInputModeUIOnly Mode;
-				Mode.SetLockMouseToViewportBehavior(EMouseLockMode::LockOnCapture);
-				PC->SetInputMode(Mode);
+				//FInputModeUIOnly Mode;
+				//Mode.SetLockMouseToViewportBehavior(EMouseLockMode::LockOnCapture);
+				//PC->SetInputMode(Mode);
 
 				PauseWidget->AddToViewport();
 				
