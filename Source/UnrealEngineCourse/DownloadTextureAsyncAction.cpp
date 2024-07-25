@@ -13,14 +13,25 @@
 UDownloadTextureAsyncAction* UDownloadTextureAsyncAction::DownloadTexture(FString URL)
 {
 	UDownloadTextureAsyncAction* Action = NewObject<UDownloadTextureAsyncAction>();
-	
-	Action->URL = MoveTemp(URL);
+
+	Action->LoadConfig();
+
+	if (!URL.IsEmpty())
+	{
+		Action->URL = MoveTemp(URL);
+	}
 
 	return Action;
 }
 
 void UDownloadTextureAsyncAction::Activate()
 {
+	if (URL.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to Download Texture Async. Invalid URL."));
+		return OnFailure.Broadcast(FBlueprintDownloadTextureResult{});
+	}
+
 	// Reference: https://forums.unrealengine.com/t/how-to-make-an-http-request-from-unreal/27577
 
 	FHttpRequestRef HttpRequest = FHttpModule::Get().CreateRequest();

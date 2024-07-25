@@ -29,7 +29,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBlueprintDownloadTextureResultDeleg
 /**
  * 
  */
-UCLASS()
+UCLASS(Config=Game)
 class UNREALENGINECOURSE_API UDownloadTextureAsyncAction : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
@@ -54,5 +54,6 @@ public:
 private:
 	void OnProcessRequestCompleted(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
 
+	UPROPERTY(Config)
 	FString URL;
 };
