@@ -4,18 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "AbilitySystemInterface.h"
 #include "UnrealEngineCourseTarget.generated.h"
 
 class UStaticMeshComponent;
 struct FTargetMemento;
 
 UCLASS()
-class UNREALENGINECOURSE_API AUnrealEngineCourseTarget : public AActor
+class UNREALENGINECOURSE_API AUnrealEngineCourseTarget : public AActor, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
 	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(VisibleDefaultsOnly, Category=GameplayAbilitySystem)
+	UAbilitySystemComponent* AbilitySystem;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -28,8 +32,16 @@ public:
 	int32 HitPoints;
 	
 protected:
+	// -- AActor overrides
+
+	virtual void PostInitializeComponents() override;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// -- IAbilitySystemInterface overrides
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 public:
 	void Save(FTargetMemento& memento) const;

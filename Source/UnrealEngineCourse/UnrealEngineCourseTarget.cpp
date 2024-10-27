@@ -4,6 +4,9 @@
 #include "UnrealEngineCourseTarget.h"
 #include "UnrealEngineCourseSaveGame.h"
 
+#include "AbilitySystemComponent.h"
+#include "GAS/HealthAttributeSet.h"
+
 // Sets default values
 AUnrealEngineCourseTarget::AUnrealEngineCourseTarget()
 {
@@ -16,8 +19,17 @@ AUnrealEngineCourseTarget::AUnrealEngineCourseTarget()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetSimulatePhysics(true);
 
-	RootComponent = Mesh;
+	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
 
+	RootComponent = Mesh;
+}
+
+void AUnrealEngineCourseTarget::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Do this in case you want the ability system to be optional. Otherwise, simply ensure that the actor has the component.
+	//AbilitySystem = Cast<UAbilitySystemComponent>(GetComponentByClass(UAbilitySystemComponent::StaticClass()));
 }
 
 // Called when the game starts or when spawned
@@ -25,7 +37,14 @@ void AUnrealEngineCourseTarget::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AbilitySystem->AddSet<UHealthAttributeSet>();
+
 	OnTakeAnyDamage.AddDynamic(this, &AUnrealEngineCourseTarget::OnTakeDamage);
+}
+
+UAbilitySystemComponent* AUnrealEngineCourseTarget::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
 }
 
 void AUnrealEngineCourseTarget::Save(FTargetMemento& Memento) const
