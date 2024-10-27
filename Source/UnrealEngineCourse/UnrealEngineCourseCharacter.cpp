@@ -148,7 +148,8 @@ void AUnrealEngineCourseCharacter::Pause(const FInputActionValue& /*Value*/)
 					//FInputModeGameOnly Mode;
 					//PC->SetInputMode(Mode);
 
-					PauseWidget->RemoveFromViewport();
+					//PauseWidget->RemoveFromViewport();
+					PauseWidget->RemoveFromParent();
 
 					PauseWidget = nullptr;
 					PC->bShowMouseCursor = false;
