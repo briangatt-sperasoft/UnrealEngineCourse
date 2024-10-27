@@ -11,6 +11,8 @@
 #include "TP_WeaponComponent.h"
 #include "UnrealEngineCoursePauseWidget.h"
 
+#include "AbilitySystemComponent.h"
+
 namespace
 {
 	TAutoConsoleVariable<bool> CVarInfiniteAmmo(
@@ -46,6 +48,8 @@ AUnrealEngineCourseCharacter::AUnrealEngineCourseCharacter()
 	Mesh1P->CastShadow = false;
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
 }
 
 void AUnrealEngineCourseCharacter::BeginPlay()
@@ -63,6 +67,11 @@ void AUnrealEngineCourseCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+}
+
+UAbilitySystemComponent* AUnrealEngineCourseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
 }
 
 //////////////////////////////////////////////////////////////////////////// Input

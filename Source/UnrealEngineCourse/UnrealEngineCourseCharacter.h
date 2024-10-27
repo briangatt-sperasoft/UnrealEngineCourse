@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "AbilitySystemInterface.h"
 #include "UnrealEngineCourseCharacter.generated.h"
 
 class UInputComponent;
@@ -24,7 +25,7 @@ UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAmmoUpdateDelegateSignature, AUnrealEngineCourseCharacter*, Character, int32, BulletCount, TSubclassOf<AUnrealEngineCourseProjectileBase>, ProjectileType);
 
 UCLASS(config=Game)
-class AUnrealEngineCourseCharacter : public ACharacter
+class AUnrealEngineCourseCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -65,11 +66,18 @@ class AUnrealEngineCourseCharacter : public ACharacter
 	UPROPERTY()
 	UUnrealEngineCoursePauseWidget* PauseWidget;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = GameplayAbilitySystem)
+	UAbilitySystemComponent* AbilitySystem;
+
 public:
 	AUnrealEngineCourseCharacter();
 
 protected:
 	virtual void BeginPlay();
+
+	// -- IAbilitySystemInterface overrides
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 public:
 		
