@@ -13,6 +13,10 @@
 
 #include "AbilitySystemComponent.h"
 
+#include "GAS/ShootAbility.h"
+#include "GAS/HealthAttributeSet.h"
+#include "GAS/WeaponAttributeSet.h"
+
 namespace
 {
 	TAutoConsoleVariable<bool> CVarInfiniteAmmo(
@@ -67,6 +71,12 @@ void AUnrealEngineCourseCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	FGameplayAbilitySpec ShootAbilitySpec{ UShootAbility::StaticClass() };
+	AbilitySystem->GiveAbility(ShootAbilitySpec);
+
+	AbilitySystem->AddSet<UWeaponAttributeSet>();
+	AbilitySystem->AddSet<UHealthAttributeSet>();
 }
 
 UAbilitySystemComponent* AUnrealEngineCourseCharacter::GetAbilitySystemComponent() const
