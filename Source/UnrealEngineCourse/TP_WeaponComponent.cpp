@@ -11,6 +11,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "TP_PredictProjectileComponent.h"
 
+#include "AbilitySystemComponent.h"
+#include "GAS/ShootAbility.h"
+
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
 {
@@ -27,17 +30,25 @@ void UTP_WeaponComponent::Fire()
 		return;
 	}
 
-	// Try and fire a projectile
-	if (ProjectileClass != nullptr)
+	if (ProjectileClass == nullptr)
 	{
-		if (!Character->UpdateAmmo(-1, ProjectileClass))
-		{
-			return;
-		}
-
-		SpawnProjectile();
+		return;
 	}
-	
+
+	// FIXME Temporary test to verify GAS using 'ShowDebug AbilitySystem'
+	{
+		UAbilitySystemComponent* AbilitySystemComponent = Character->GetAbilitySystemComponent();
+		AbilitySystemComponent->TryActivateAbilityByClass(UShootAbility::StaticClass());
+	}
+
+	// Try and fire a projectile
+	if (!Character->UpdateAmmo(-1, ProjectileClass))
+	{
+		return;
+	}
+
+	SpawnProjectile();
+
 	// Try and play the sound if specified
 	if (FireSound != nullptr)
 	{

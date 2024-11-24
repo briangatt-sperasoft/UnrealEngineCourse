@@ -5,6 +5,16 @@
 
 #include "WeaponAttributeSet.h"
 
+#include <UnrealEngineCourse/UnrealEngineCourseCharacter.h>
+#include <UnrealEngineCourse/TP_WeaponComponent.h>
+
+UShootAbility::UShootAbility()
+    : UGameplayAbility()
+{
+    static ConstructorHelpers::FClassFinder<UGameplayEffect> AmmoUseClassFinder(TEXT("/Game/FirstPerson/Blueprints/GAS/GAE_UseAmmo"));
+    CostGameplayEffectClass = AmmoUseClassFinder.Class;
+}
+
 bool UShootAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags /*= nullptr*/, const FGameplayTagContainer* TargetTags /*= nullptr*/, OUT FGameplayTagContainer* OptionalRelevantTags /*= nullptr*/) const
 {
     const bool bCanActivateAbility = Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
@@ -16,30 +26,25 @@ bool UShootAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
     check(ActorInfo != nullptr);
     check(ActorInfo->AbilitySystemComponent.IsValid());
-        
+    
+	const AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(ActorInfo->OwnerActor);
     const UWeaponAttributeSet* WeaponAttributes = ActorInfo->AbilitySystemComponent->GetSet<UWeaponAttributeSet>();
 
-    return (WeaponAttributes != nullptr) && (WeaponAttributes->GetAmmoCount() > 0.f);
+    return (WeaponAttributes != nullptr) && (WeaponAttributes->GetAmmoCount() > 0.f) &&
+		(Character != nullptr) && (Character->GetAttachedWeapon() != nullptr);
 }
 
 void UShootAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+    //Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-    // TODO 
-}
+	check(CanActivateAbility(Handle, ActorInfo));
 
-bool UShootAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, OUT FGameplayTagContainer* OptionalRelevantTags /*= nullptr*/)
-{
-    return Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags);
-}
+	//const AUnrealEngineCourseCharacter* Character = Cast<AUnrealEngineCourseCharacter>(ActorInfo->OwnerActor);
+	//Character->GetAttachedWeapon()->Fire();
 
-void UShootAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
-{
-    Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-}
-
-void UShootAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{
-    Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+    const bool bCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
+    (void)(bCommitted);
+    
+    EndAbility(Handle, ActorInfo, ActivationInfo, false, false);
 }

@@ -72,11 +72,12 @@ void AUnrealEngineCourseCharacter::BeginPlay()
 		}
 	}
 
-	FGameplayAbilitySpec ShootAbilitySpec{ UShootAbility::StaticClass() };
+	FGameplayAbilitySpec ShootAbilitySpec = AbilitySystem->BuildAbilitySpecFromClass(UShootAbility::StaticClass());
 	AbilitySystem->GiveAbility(ShootAbilitySpec);
 
 	AbilitySystem->AddSet<UWeaponAttributeSet>();
 	AbilitySystem->AddSet<UHealthAttributeSet>();
+
 }
 
 UAbilitySystemComponent* AUnrealEngineCourseCharacter::GetAbilitySystemComponent() const

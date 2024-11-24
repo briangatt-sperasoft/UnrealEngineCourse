@@ -14,6 +14,7 @@ class USceneComponent;
 class UCameraComponent;
 class UAnimMontage;
 class USoundBase;
+class UGameplayEffect;
 
 class AUnrealEngineCourseCharacter;
 class UTP_WeaponComponent;
@@ -69,12 +70,17 @@ class AUnrealEngineCourseCharacter : public ACharacter, public IAbilitySystemInt
 	UPROPERTY(VisibleDefaultsOnly, Category = GameplayAbilitySystem)
 	UAbilitySystemComponent* AbilitySystem;
 
+	UPROPERTY(EditAnywhere, Category = GameplayAbilitySystem)
+	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
+
 public:
 	AUnrealEngineCourseCharacter();
 
 protected:
 	virtual void BeginPlay();
 
+// FIXME Avoid exposing as public, leave protected
+public:
 	// -- IAbilitySystemInterface overrides
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
