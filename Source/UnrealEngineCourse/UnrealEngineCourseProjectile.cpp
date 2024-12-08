@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "VisualLogger/VisualLogger.h"
 #include "Logging/LogMacros.h"
+#include "AbilitySystemComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogProjectileActor, Verbose, All);
 
@@ -32,6 +33,8 @@ AUnrealEngineCourseProjectile::AUnrealEngineCourseProjectile()
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
+	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
+
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
 
@@ -40,6 +43,20 @@ AUnrealEngineCourseProjectile::AUnrealEngineCourseProjectile()
 
 void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	// FIXME Temporary test to verify GAS using 'ShowDebug AbilitySystem' or Output Log
+	if ((OtherActor != nullptr) && (OtherActor != this))
+	{
+		UAbilitySystemComponent* TargetAbilitySystemComponent = Cast<UAbilitySystemComponent>(OtherActor->GetComponentByClass(UAbilitySystemComponent::StaticClass()));
+
+		if (IsValid(TargetAbilitySystemComponent))
+		{
+			// TODO Apply through a damage ability instead
+			FGameplayEffectSpecHandle DamageEffectSpec = GetAbilitySystemComponent()->MakeOutgoingSpec(DamageEffect, 1.0f, GetAbilitySystemComponent()->MakeEffectContext());
+			check(DamageEffectSpec.IsValid());
+			GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*DamageEffectSpec.Data.Get(), TargetAbilitySystemComponent);
+		}
+	}
+
 	// Only add impulse and destroy projectile if we hit a physics
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
@@ -67,4 +84,9 @@ void AUnrealEngineCourseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* 
 float AUnrealEngineCourseProjectile::GetInitialSpeed() const
 {
 	return ProjectileMovement->InitialSpeed;
+}
+
+UAbilitySystemComponent* AUnrealEngineCourseProjectile::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
 }

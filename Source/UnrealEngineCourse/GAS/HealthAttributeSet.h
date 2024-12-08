@@ -22,6 +22,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Health;
 
+	void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
+
 public:
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UHealthAttributeSet, Health)
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(Health)

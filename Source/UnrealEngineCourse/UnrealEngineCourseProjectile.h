@@ -3,14 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "UnrealEngineCourseProjectileBase.h"
 #include "UnrealEngineCourseProjectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UGameplayEffect;
 
 UCLASS(config=Game)
-class AUnrealEngineCourseProjectile : public AUnrealEngineCourseProjectileBase
+class AUnrealEngineCourseProjectile : public AUnrealEngineCourseProjectileBase, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -21,6 +23,12 @@ class AUnrealEngineCourseProjectile : public AUnrealEngineCourseProjectileBase
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = GameplayAbilitySystem)
+	UAbilitySystemComponent* AbilitySystem;
+
+	UPROPERTY(EditAnywhere, Category = GameplayAbilitySystem)
+	TSubclassOf<UGameplayEffect> DamageEffect;
 
 public:
 	AUnrealEngineCourseProjectile();
@@ -35,5 +43,9 @@ public:
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
 	float GetInitialSpeed() const override;
+
+	// -- IAbilitySystemInterface overrides -- 
+	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	// -- IAbilitySystemInterface overrides -- 
 };
 
