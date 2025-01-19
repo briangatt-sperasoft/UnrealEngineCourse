@@ -70,6 +70,9 @@ class AUnrealEngineCourseCharacter : public ACharacter, public IAbilitySystemInt
 	UPROPERTY(VisibleDefaultsOnly, Category = GameplayAbilitySystem)
 	UAbilitySystemComponent* AbilitySystem;
 
+	UPROPERTY(EditAnywhere, Category = GameplayAbilitySystem)
+	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
+
 public:
 	AUnrealEngineCourseCharacter();
 

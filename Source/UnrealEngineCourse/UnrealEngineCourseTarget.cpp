@@ -13,7 +13,7 @@ AUnrealEngineCourseTarget::AUnrealEngineCourseTarget()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	HitPoints = 100;
+	Health = 100;
 	bImmortal = false;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -52,23 +52,23 @@ void AUnrealEngineCourseTarget::Save(FTargetMemento& Memento) const
 	GetName(Memento.Name);
 
 	Memento.Transform = GetActorTransform();
-	Memento.HitPoints = HitPoints;
+	Memento.HitPoints = Health;
 }
 
 void AUnrealEngineCourseTarget::Load(const FTargetMemento& Memento)
 {
 	SetActorTransform(Memento.Transform);
-	HitPoints = Memento.HitPoints;
+	Health = Memento.HitPoints;
 }
 
 void AUnrealEngineCourseTarget::OnTakeDamage(AActor* /*DamagedActor*/, float Damage, const class UDamageType* /*DamageType*/, AController* /*InstigatedBy*/, AActor* /*DamageCauser*/)
 {
 	if (!bImmortal)
 	{
-		HitPoints -= static_cast<int>(Damage);
+		Health -= static_cast<int>(Damage);
 	}
 
-	if (HitPoints <= 0)
+	if (Health <= 0)
 	{
 		Destroy();
 	}

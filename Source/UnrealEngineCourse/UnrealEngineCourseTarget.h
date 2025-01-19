@@ -29,7 +29,7 @@ public:
 	bool bImmortal;
 	
 	UPROPERTY(EditAnywhere, Category=Health, meta = (EditCondition = "!bImmortal", ClampMin = "0", ClampMax = "100"))
-	int32 HitPoints;
+	int32 Health;
 	
 protected:
 	// -- AActor overrides
